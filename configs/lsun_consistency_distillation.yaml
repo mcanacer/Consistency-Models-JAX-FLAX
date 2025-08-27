@@ -1,0 +1,42 @@
+dataset_params:
+  batch_size: 64
+  num_workers: 4
+
+model:
+  learning_rate: 2e-4
+  b1: 0.9
+  seed: 61
+  target: unet.UNet
+  params:
+    channel_multiplier: [1, 2, 2, 2]
+    channel: 128
+    n_res_block: 2
+    attn_strides: [16]
+    attn_heads: 1
+  checkpoint_path: lsun_models.pkl
+  epochs: 100
+  ema_decay: 0.9999
+
+teacher_model:
+  checkpoint_path: lsun.pkl
+  params:
+    channel_multiplier: [1, 2, 2, 2]
+    channel: 128
+    n_res_block: 2
+    attn_strides: [ 16 ]
+    attn_heads: 1
+
+SDE:
+  name: 'KVESDE'
+  params:
+    sigma_min: 0.02
+    sigma_max: 80
+    sigma_data: 0.5
+    rho: 7.0
+
+sampler:
+  name: 'Heun'
+
+wandb:
+  project: 'Score-Based SDE'
+  name: 'cifar10'

@@ -1,0 +1,53 @@
+dataset_params:
+  batch_size: 64
+  img_size: 128
+  num_workers: 4
+
+model:
+  learning_rate: 1e-4
+  b1: 0.9
+  seed: 61
+  target: unet.UNet
+  params:
+    channel_multiplier: [1, 1, 2, 3, 4]
+    channel: 128
+    n_res_block: 2
+    attn_strides: [8, 16, 32]
+    attn_heads: 4
+  checkpoint_path: /content/drive/MyDrive/consistency-models/lsun_big_edm.pkl
+  epochs: 200
+  ema_decay: 0.999943
+  target_ema_decay: 0.95
+
+teacher_model:
+  target: unet.Unet
+  params:
+    channel_multiplier: [1, 1, 2, 3, 4]
+    channel: 128
+    n_res_block: 2
+    attn_strides: [8, 16, 32]
+    attn_heads: 4
+  checkpoint_path:
+
+ema_and_scale:
+  target_mode: 'adaptive'
+  start_ema: 0.95
+  scale_mode: 'progressive'
+  start_scales: 2
+  end_scaleS: 200
+  total_steps: 400000
+
+SDE:
+  name: 'KVESDE'
+  params:
+    sigma_min: 0.02
+    sigma_max: 80
+    sigma_data: 0.5
+    rho: 7.0
+
+sampler:
+  name: 'Heun'
+
+wandb:
+  project: 'Score-Based EDM'
+  name: 'LSUN-Bedrooms'
