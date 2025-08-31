@@ -40,7 +40,14 @@ def ema_update(ema_params, new_params, decay):
     )
 
 
-def make_ema_and_scale_fn(target_ema_mode, start_ema, scale_mode, start_scales, end_scales, total_steps):
+def make_ema_and_scale_fn(
+        target_ema_mode,
+        start_ema,
+        scale_mode,
+        start_scales,
+        end_scales,
+        total_steps
+):
     if target_ema_mode == "fixed" and scale_mode == "fixed":
         def step_scheduler(step):
             return start_ema, start_scales
@@ -79,7 +86,18 @@ def get_denoiser_fn(apply_fn, sde):
 
 
 def make_update_fn(*, optimizer, denoiser_fn, lpips_apply_fn, sde, loss_norm, ema_decay):
-    def update_fn(params, opt_state, x, rng, teacher_params, lpips_params, target_params, num_scales, target_ema_decay, ema_params):
+    def update_fn(
+            params,
+            opt_state,
+            x,
+            rng,
+            teacher_params,
+            lpips_params,
+            target_params,
+            num_scales,
+            target_ema_decay,
+            ema_params
+    ):
         def heun_solver(params, samples, t, next_t, x0=None):
             x = samples
             if params is None:
@@ -114,7 +132,12 @@ def make_update_fn(*, optimizer, denoiser_fn, lpips_apply_fn, sde, loss_norm, em
         def loss_fn(params):
             time_rng, sample_rng = jax.random.split(rng, 2)
 
-            indices = jax.random.randint(time_rng, shape=(x.shape[0],), minval=0, maxval=num_scales - 1)
+            indices = jax.random.randint(
+                time_rng,
+                shape=(x.shape[0],),
+                minval=0,
+                maxval=num_scales - 1
+            )
 
             t = sde.sigma_max ** (1 / sde.rho) + indices / (num_scales - 1) * (
                     sde.sigma_min ** (1 / sde.rho) - sde.sigma_max ** (1 / sde.rho)
@@ -150,9 +173,11 @@ def make_update_fn(*, optimizer, denoiser_fn, lpips_apply_fn, sde, loss_norm, em
                     distiller, (distiller.shape[0], 224, 224, 3), method="bilinear"
                 )
                 distiller_target = jax.image.resize(
-                    distiller_target, (distiller_target.shape[0], 224, 224, 3), method="bilinear"
+                    distiller_target,
+                    (distiller_target.shape[0], 224, 224, 3), method="bilinear"
                 )
-                loss = jnp.squeeze(lpips_apply_fn(lpips_params, distiller, distiller_target).sum())
+                loss = jnp.squeeze(
+                    lpips_apply_fn(lpips_params, distiller, distiller_target).sum())
             else:
                 raise ValueError(f'Unkown loss norm: {loss_norm}')
 
@@ -238,7 +263,8 @@ def main(config_path):
 
     key = jax.random.PRNGKey(seed)
     key, init_key, sub_key = jax.random.split(key, 3)
-    lpips_params = lpips.init(init_key, jnp.ones((2, 224, 224, 3)), jnp.ones((2, 224, 224, 3)))
+    lpips_params = lpips.init(init_key,
+                              jnp.ones((2, 224, 224, 3)), jnp.ones((2, 224, 224, 3)))
 
     if teacher_config['checkpoint_path']:
         teacher_params = load_checkpoint(teacher_config['checkpoint'], None)['ema_params']
@@ -248,7 +274,8 @@ def main(config_path):
     else:
         teacher_params = None
 
-        model_params = model.init(sub_key, jnp.ones((2, 128, 128, 3)), jnp.ones((2,), dtype=jnp.int32))
+        model_params = model.init(sub_key,
+                                  jnp.ones((2, 128, 128, 3)), jnp.ones((2,), dtype=jnp.int32))
         target_params = model_params
 
     opt_state = optimizer.init(model_params)

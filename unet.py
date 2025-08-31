@@ -192,7 +192,7 @@ class UNet(nn.Module):
 if __name__ == '__main__':
     key = jax.random.PRNGKey(0)
     sub_key = jax.random.PRNGKey(1)
-    model = UNet([1, 2, 2, 4, 4], [2, 4], attn_heads=32)
+    model = UNet([1, 1, 2, 2, 4, 4], [8, 16, 32], attn_heads=4, channel=128)
     fake_timesteps = jax.random.randint(sub_key, minval=0, maxval=1000, shape=(2,))
-    fake_images = jnp.ones((2, 16, 16, 4), dtype=jnp.float32)
+    fake_images = jnp.ones((2, 256, 256, 3), dtype=jnp.float32)
     params = model.init(key, fake_images, fake_timesteps)

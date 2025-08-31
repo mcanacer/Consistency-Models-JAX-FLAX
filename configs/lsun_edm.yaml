@@ -27,7 +27,7 @@ SDE:
     rho: 7.0
 
 sampler:
-  name: 'Heun'
+  name: 'heun'
 
 wandb:
   project: 'Score-Based EDM'
